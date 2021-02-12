@@ -52,16 +52,21 @@ class ChessGame(arcade.Window):
 
 
 def init_pieces(color, piece_list):
+    """Initialize the pieces in their starting positions, depending on color."""
+
+    # Validate your input!
     if color not in ["white", "black"]:
         raise ValueError(f"Color must be 'white' or 'black', got '{color}")
 
+    # Change the order depending on the color
     order = PIECE_ORDER if color == "white" else reversed(PIECE_ORDER)
     for col, piece in enumerate(order):
         # Add a major piece
         location = f"sprites/{color}_{piece}.png"
         piece = arcade.Sprite(location, scale=CHARACTER_SCALING)
-
         piece.center_x = (col + 0.5) * SQUARE_SIZE  # Set the x by column
+
+        # The y-location depends on the color
         y_loc = 0.5 * SQUARE_SIZE
         if color == "black":
             y_loc = SCREEN_HEIGHT - y_loc
@@ -71,6 +76,8 @@ def init_pieces(color, piece_list):
         # Add a pawn
         pawn = arcade.Sprite(f"sprites/{color}_pawn.png", scale=CHARACTER_SCALING)
         pawn.center_x = piece.center_x  # Same x as major piece
+
+        # Again, y-location depends on color
         y_offset = SQUARE_SIZE if color == "white" else -SQUARE_SIZE
         pawn.center_y = piece.center_y + y_offset
         piece_list.append(pawn)
