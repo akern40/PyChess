@@ -84,6 +84,7 @@ def init_pieces(color, piece_list):
 
 
 def draw_board():
+    """Draw the underlying board."""
     arcade.draw_lrtb_rectangle_outline(
         0,
         SCREEN_WIDTH - WIDTH_BUFFER,
@@ -95,11 +96,13 @@ def draw_board():
     color_white = False
     for row in range(8):
         for col in range(8):
+            # Get color based on boolean
             color = (
                 arcade.csscolor.IVORY
                 if color_white
                 else arcade.csscolor.DARK_SLATE_GRAY
             )
+            # Draw a filled rectangle
             arcade.draw_lrtb_rectangle_filled(
                 col * SQUARE_SIZE,
                 (col + 1) * SQUARE_SIZE,
@@ -107,7 +110,9 @@ def draw_board():
                 row * SQUARE_SIZE,
                 color,
             )
+            # Switch color based on column
             color_white = not color_white
+        # Switch starting color based on row
         color_white = not color_white
 
 
