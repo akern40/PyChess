@@ -2,7 +2,7 @@
 
 import arcade
 
-from .constants import (
+from constants import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     WIDTH_BUFFER,
@@ -11,6 +11,8 @@ from .constants import (
     CHARACTER_SCALING,
     PIECE_ORDER,
     Color,
+    WHITE_COLOR,
+    BLACK_COLOR,
 )
 
 
@@ -35,8 +37,8 @@ class ChessGame(arcade.Window):
         self.white_pieces = arcade.SpriteList()
         self.black_pieces = arcade.SpriteList()
 
-        init_pieces("white", self.white_pieces)
-        init_pieces("black", self.black_pieces)
+        init_pieces(Color.WHITE, self.white_pieces)
+        init_pieces(Color.BLACK, self.black_pieces)
 
     def on_draw(self):
         """Render the screen."""
@@ -55,7 +57,7 @@ def init_pieces(color: Color, piece_list: arcade.SpriteList):
     order = PIECE_ORDER if color == Color.WHITE else reversed(PIECE_ORDER)
     for col, piece in enumerate(order):
         # Add a major piece
-        location = f"sprites/{color}_{piece}.png"
+        location = f"sprites/{color}_{piece}.png".lower()
         piece = arcade.Sprite(location, scale=CHARACTER_SCALING)
         piece.center_x = (col + 0.5) * SQUARE_SIZE  # Set the x by column
 
@@ -67,6 +69,7 @@ def init_pieces(color: Color, piece_list: arcade.SpriteList):
         piece_list.append(piece)
 
         # Add a pawn
+        location = f"sprites/{color}_pawn.png".lower()
         pawn = arcade.Sprite(f"sprites/{color}_pawn.png", scale=CHARACTER_SCALING)
         pawn.center_x = piece.center_x  # Same x as major piece
 
@@ -90,11 +93,7 @@ def draw_board():
     for row in range(8):
         for col in range(8):
             # Get color based on boolean
-            color = (
-                arcade.csscolor.IVORY
-                if color_white
-                else arcade.csscolor.DARK_SLATE_GRAY
-            )
+            color = WHITE_COLOR if color_white else BLACK_COLOR
             # Draw a filled rectangle
             arcade.draw_lrtb_rectangle_filled(
                 col * SQUARE_SIZE,

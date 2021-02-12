@@ -2,7 +2,7 @@
 
 import arcade
 
-from .constants import Color
+from constants import Color
 
 
 class Piece(arcade.Sprite):
