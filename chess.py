@@ -10,6 +10,7 @@ from .constants import (
     SCREEN_TITLE,
     CHARACTER_SCALING,
     PIECE_ORDER,
+    Color,
 )
 
 
@@ -47,15 +48,11 @@ class ChessGame(arcade.Window):
         self.black_pieces.draw()
 
 
-def init_pieces(color, piece_list):
+def init_pieces(color: Color, piece_list: arcade.SpriteList):
     """Initialize the pieces in their starting positions, depending on color."""
 
-    # Validate your input!
-    if color not in ("white", "black"):
-        raise ValueError(f"Color must be 'white' or 'black', got '{color}")
-
     # Change the order depending on the color
-    order = PIECE_ORDER if color == "white" else reversed(PIECE_ORDER)
+    order = PIECE_ORDER if color == Color.WHITE else reversed(PIECE_ORDER)
     for col, piece in enumerate(order):
         # Add a major piece
         location = f"sprites/{color}_{piece}.png"
@@ -64,7 +61,7 @@ def init_pieces(color, piece_list):
 
         # The y-location depends on the color
         y_loc = 0.5 * SQUARE_SIZE
-        if color == "black":
+        if color == Color.BLACK:
             y_loc = SCREEN_HEIGHT - y_loc
         piece.center_y = y_loc
         piece_list.append(piece)
@@ -74,7 +71,7 @@ def init_pieces(color, piece_list):
         pawn.center_x = piece.center_x  # Same x as major piece
 
         # Again, y-location depends on color
-        y_offset = SQUARE_SIZE if color == "white" else -SQUARE_SIZE
+        y_offset = SQUARE_SIZE if color == Color.WHITE else -SQUARE_SIZE
         pawn.center_y = piece.center_y + y_offset
         piece_list.append(pawn)
 

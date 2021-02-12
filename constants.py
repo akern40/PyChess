@@ -1,4 +1,11 @@
 """Constants for the chess game."""
+from enum import Enum
+
+
+class Color(Enum):
+    WHITE = 1
+    BLACK = 2
+
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 750
