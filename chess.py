@@ -38,34 +38,8 @@ class ChessGame(arcade.Window):
         self.white_pieces = arcade.SpriteList()
         self.black_pieces = arcade.SpriteList()
 
-        # Add the white pieces
-        for col, piece in enumerate(PIECE_ORDER):
-            # Add a major piece
-            location = f"sprites/white_{piece}.png"
-            piece = arcade.Sprite(location, scale=CHARACTER_SCALING)
-            piece.center_x = (col + 0.5) * SQUARE_SIZE  # Set the x by column
-            piece.center_y = 0.5 * SQUARE_SIZE  # All start at the bottom
-            self.white_pieces.append(piece)
-
-            # Add a pawn
-            pawn = arcade.Sprite("sprites/white_pawn.png", scale=CHARACTER_SCALING)
-            pawn.center_x = piece.center_x  # Same x as major piece
-            pawn.center_y = piece.center_y + SQUARE_SIZE  # One square up for y
-            self.white_pieces.append(pawn)
-
-        # Add the black pieces
-        for col, piece in enumerate(reversed(PIECE_ORDER)):
-            # Add a major piece
-            location = f"sprites/black_{piece}.png"
-            piece = arcade.Sprite(location, scale=CHARACTER_SCALING)
-            piece.center_x = (col + 0.5) * SQUARE_SIZE  # Set the x by column
-            piece.center_y = SCREEN_HEIGHT - 0.5 * SQUARE_SIZE  # all start at the top
-            self.black_pieces.append(piece)
-
-            pawn = arcade.Sprite("sprites/black_pawn.png", scale=CHARACTER_SCALING)
-            pawn.center_x = piece.center_x  # Same x as major piece
-            pawn.center_y = piece.center_y - SQUARE_SIZE  # One square down for y
-            self.black_pieces.append(pawn)
+        init_pieces("white", self.white_pieces)
+        init_pieces("black", self.black_pieces)
 
     def on_draw(self):
         """Render the screen."""
@@ -75,6 +49,31 @@ class ChessGame(arcade.Window):
         draw_board()
         self.white_pieces.draw()
         self.black_pieces.draw()
+
+
+def init_pieces(color, piece_list):
+    if color not in ["white", "black"]:
+        raise ValueError(f"Color must be 'white' or 'black', got '{color}")
+
+    order = PIECE_ORDER if color == "white" else reversed(PIECE_ORDER)
+    for col, piece in enumerate(order):
+        # Add a major piece
+        location = f"sprites/{color}_{piece}.png"
+        piece = arcade.Sprite(location, scale=CHARACTER_SCALING)
+
+        piece.center_x = (col + 0.5) * SQUARE_SIZE  # Set the x by column
+        y_loc = 0.5 * SQUARE_SIZE
+        if color == "black":
+            y_loc = SCREEN_HEIGHT - y_loc
+        piece.center_y = y_loc
+        piece_list.append(piece)
+
+        # Add a pawn
+        pawn = arcade.Sprite(f"sprites/{color}_pawn.png", scale=CHARACTER_SCALING)
+        pawn.center_x = piece.center_x  # Same x as major piece
+        y_offset = SQUARE_SIZE if color == "white" else -SQUARE_SIZE
+        pawn.center_y = piece.center_y + y_offset
+        piece_list.append(pawn)
 
 
 def draw_board():
