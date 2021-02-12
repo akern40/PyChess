@@ -2,19 +2,15 @@
 
 import arcade
 
-# Constants
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 750
-WIDTH_BUFFER = SCREEN_WIDTH - SCREEN_HEIGHT  # We're adding a buffer for later
-SQUARE_SIZE = SCREEN_HEIGHT / 8
-
-SCREEN_TITLE = "Chess"
-
-# The pieces are natively 240px, we need to scale them down
-CHARACTER_SCALING = SQUARE_SIZE / 240
-
-# This is white's order of pieces, at the start of the game
-PIECE_ORDER = ["rook", "knight", "bishop", "queen", "king", "bishop", "knight", "rook"]
+from .constants import (
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+    WIDTH_BUFFER,
+    SQUARE_SIZE,
+    SCREEN_TITLE,
+    CHARACTER_SCALING,
+    PIECE_ORDER,
+)
 
 
 class ChessGame(arcade.Window):
@@ -55,7 +51,7 @@ def init_pieces(color, piece_list):
     """Initialize the pieces in their starting positions, depending on color."""
 
     # Validate your input!
-    if color not in ["white", "black"]:
+    if color not in ("white", "black"):
         raise ValueError(f"Color must be 'white' or 'black', got '{color}")
 
     # Change the order depending on the color
