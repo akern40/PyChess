@@ -150,7 +150,7 @@ class Piece(arcade.Sprite):
     def __str__(self):
         return self.letter + str(self.board_position)
 
-    def get_possible_moves(self, all_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
         pass
 
 
@@ -162,12 +162,9 @@ class King(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "K"
 
-    def get_possible_moves(self, white_pieces, black_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
         """Get possible moves for a king."""
-        ally_positions = [
-            p.board_position
-            for p in (white_pieces if self.side == Side.WHITE else black_pieces)
-        ]
+        ally_positions = [p.board_position for p in ally_pieces]
 
         moves = []
         for x_offset in range(-1, 1):
@@ -191,16 +188,10 @@ class Queen(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "Q"
 
-    def get_possible_moves(self, white_pieces, black_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
         """Get possible moves for a queen."""
-        ally_positions = [
-            p.board_position
-            for p in (white_pieces if self.side == Side.WHITE else black_pieces)
-        ]
-        enemy_positions = [
-            p.board_position
-            for p in (black_pieces if self.side == Side.WHITE else white_pieces)
-        ]
+        ally_positions = [p.board_position for p in ally_pieces]
+        enemy_positions = [p.board_position for p in enemy_pieces]
 
         horiz_vert_moves = get_horiz_vert(
             self.board_position, ally_positions, enemy_positions
@@ -217,16 +208,10 @@ class Bishop(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "B"
 
-    def get_possible_moves(self, white_pieces, black_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
         """Get possible moves for a bishop."""
-        ally_positions = [
-            p.board_position
-            for p in (white_pieces if self.side == Side.WHITE else black_pieces)
-        ]
-        enemy_positions = [
-            p.board_position
-            for p in (black_pieces if self.side == Side.WHITE else white_pieces)
-        ]
+        ally_positions = [p.board_position for p in ally_pieces]
+        enemy_positions = [p.board_position for p in enemy_pieces]
 
         return get_diag(self.board_position, ally_positions, enemy_positions)
 
@@ -239,16 +224,10 @@ class Rook(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "R"
 
-    def get_possible_moves(self, white_pieces, black_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
         """Get possible moves for a rook."""
-        ally_positions = [
-            p.board_position
-            for p in (white_pieces if self.side == Side.WHITE else black_pieces)
-        ]
-        enemy_positions = [
-            p.board_position
-            for p in (black_pieces if self.side == Side.WHITE else white_pieces)
-        ]
+        ally_positions = [p.board_position for p in ally_pieces]
+        enemy_positions = [p.board_position for p in enemy_pieces]
 
         return get_horiz_vert(self.board_position, ally_positions, enemy_positions)
 
@@ -261,12 +240,9 @@ class Knight(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "N"
 
-    def get_possible_moves(self, white_pieces, black_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
         """Get possible moves for a knight."""
-        ally_positions = [
-            p.board_position
-            for p in (white_pieces if self.side == Side.WHITE else black_pieces)
-        ]
+        ally_positions = [p.board_position for p in ally_pieces]
 
         moves = []
         for position in ((2, 1), (2, -1), (-2, 1), (-2, -1)):
@@ -291,16 +267,10 @@ class Pawn(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = ""
 
-    def get_possible_moves(self, white_pieces, black_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
         """Get possible moves for a pawn."""
-        ally_positions = [
-            p.board_position
-            for p in (white_pieces if self.side == Side.WHITE else black_pieces)
-        ]
-        enemy_positions = [
-            p.board_position
-            for p in (black_pieces if self.side == Side.WHITE else white_pieces)
-        ]
+        ally_positions = [p.board_position for p in ally_pieces]
+        enemy_positions = [p.board_position for p in enemy_pieces]
 
         moves = []
 

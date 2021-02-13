@@ -44,14 +44,8 @@ class Player:
 
             # Get that piece's possible moves, and changee the state
             if self.selected_piece is not None:
-                white_pieces = (
-                    self.pieces if self.side == Side.WHITE else opponent.pieces
-                )
-                black_pieces = (
-                    self.pieces if self.side == Side.BLACK else opponent.pieces
-                )
                 self.possible_moves = self.selected_piece.get_possible_moves(
-                    white_pieces, black_pieces
+                    self.pieces, opponent.pieces
                 )
         else:
             # Check if the selected square is a valid move

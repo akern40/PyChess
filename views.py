@@ -84,6 +84,7 @@ class ChessGame(arcade.View):
         )
 
         current_player = self.white_player if self.white_turn else self.black_player
+        opponent = self.black_player if self.white_turn else self.white_player
 
         color_white = False
         for row in range(8):
@@ -95,7 +96,7 @@ class ChessGame(arcade.View):
                     current_player.selected_piece.board_position == position
                     or position
                     in current_player.selected_piece.get_possible_moves(
-                        self.white_player.pieces, self.black_player.pieces
+                        current_player.pieces, opponent.pieces
                     )
                 ):
                     color = OFFWHITE_COLOR if color_white else OFFBLACK_COLOR
