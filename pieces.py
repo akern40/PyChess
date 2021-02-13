@@ -1,8 +1,135 @@
 """Classes and functions for pieces."""
+from typing import List
 
 import arcade
 
 from constants import Side, BoardPosition
+
+
+def get_horiz_vert(
+    position: BoardPosition,
+    ally_positions: List[BoardPosition],
+    enemy_positions: List[BoardPosition],
+):
+    """Get possible horizontal and vertical positions given a position and the enemies and allies."""
+    moves = []
+    right_ok = True
+    left_ok = True
+    down_ok = True
+    up_ok = True
+
+    for offset in range(8):
+        if offset == 0:
+            continue
+
+        # Right
+        if right_ok and position.check_valid(offset, 0):
+            m = position.get_offset(offset, 0)
+            if m in ally_positions:
+                right_ok = False
+            elif m in enemy_positions:
+                right_ok = False
+                moves.append(m)
+            else:
+                moves.append(m)
+
+        # Left
+        if left_ok and position.check_valid(-offset, 0):
+            m = position.get_offset(-offset, 0)
+            if m in ally_positions:
+                left_ok = False
+            elif m in enemy_positions:
+                left_ok = False
+                moves.append(m)
+            else:
+                moves.append(m)
+
+        # Up
+        if up_ok and position.check_valid(0, offset):
+            m = position.get_offset(0, offset)
+            if m in ally_positions:
+                up_ok = False
+            elif m in enemy_positions:
+                up_ok = False
+                moves.append(m)
+            else:
+                moves.append(m)
+
+        # Down
+        if down_ok and position.check_valid(0, -offset):
+            m = position.get_offset(0, -offset)
+            if m in ally_positions:
+                down_ok = False
+            elif m in enemy_positions:
+                down_ok = False
+                moves.append(m)
+            else:
+                moves.append(m)
+
+        return moves
+
+
+def get_diag(
+    position: BoardPosition,
+    ally_positions: List[BoardPosition],
+    enemy_positions: List[BoardPosition],
+):
+    """Get possible diagonal positions given a position and the enemies and allies."""
+    moves = []
+    ul_ok = True
+    ur_ok = True
+    dl_ok = True
+    dr_ok = True
+
+    for offset in range(8):
+        if offset == 0:
+            continue
+
+        # Up and right
+        if ur_ok and position.check_valid(offset, offset):
+            m = position.get_offset(offset, offset)
+            if m in ally_positions:
+                ur_ok = False
+            elif m in enemy_positions:
+                ur_ok = False
+                moves.append(m)
+            else:
+                moves.append(m)
+
+        # Up and left
+        if ul_ok and position.check_valid(-offset, offset):
+            m = position.get_offset(-offset, offset)
+            if m in ally_positions:
+                ul_ok = False
+            elif m in enemy_positions:
+                ul_ok = False
+                moves.append(m)
+            else:
+                moves.append(m)
+
+        # Down and right
+        if dr_ok and position.check_valid(offset, -offset):
+            m = position.get_offset(offset, -offset)
+            if m in ally_positions:
+                dr_ok = False
+            elif m in enemy_positions:
+                dr_ok = False
+                moves.append(m)
+            else:
+                moves.append(m)
+
+        # Down
+        if dl_ok and position.check_valid(-offset, -offset):
+            m = position.get_offset(-offset, -offset)
+            if m in ally_positions:
+                dl_ok = False
+            elif m in enemy_positions:
+                dl_ok = False
+                moves.append(m)
+            else:
+                moves.append(m)
+
+        return moves
 
 
 class Piece(arcade.Sprite):
@@ -37,9 +164,12 @@ class King(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "K"
 
-    def get_possible_moves(self, all_pieces, en_passant=False):
+    def get_possible_moves(self, white_pieces, black_pieces, en_passant=False):
         """Get possible moves for a king."""
-        piece_positions = [p.board_position for p in all_pieces]
+        ally_positions = [
+            p.board_position
+            for p in (white_pieces if self.side == Side.WHITE else black_pieces)
+        ]
 
         moves = []
         for x_offset in range(-1, 1):
@@ -49,7 +179,7 @@ class King(Piece):
 
                 if self.board_position.check_valid(x_offset, y_offset):
                     position = self.board_position.get_offset(x_offset, y_offset)
-                    if position not in piece_positions:
+                    if position not in ally_positions:
                         moves.append(self.board_position.get_offset(x_offset, y_offset))
 
         return moves
@@ -63,31 +193,22 @@ class Queen(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "Q"
 
-    def get_possible_moves(self, all_pieces, en_passant=False):
+    def get_possible_moves(self, white_pieces, black_pieces, en_passant=False):
         """Get possible moves for a queen."""
-        moves = []
+        ally_positions = [
+            p.board_position
+            for p in (white_pieces if self.side == Side.WHITE else black_pieces)
+        ]
+        enemy_positions = [
+            p.board_position
+            for p in (black_pieces if self.side == Side.WHITE else white_pieces)
+        ]
 
-        for offset in range(-7, 7):
-            if offset == 0:
-                continue
-
-            # Horizontal/vertical first
-            if self.board_position.check_valid(offset, 0):
-                moves.append(self.board_position.get_offset(offset, 0))
-            if self.board_position.check_valid(0, offset):
-                moves.append(self.board_position.get_offset(0, offset))
-
-            # Now diagonals
-            if self.board_position.check_valid(offset, offset):
-                moves.append(self.board_position.get_offset(offset, offset))
-            if self.board_position.check_valid(offset, -offset):
-                moves.append(self.board_position.get_offset(offset, -offset))
-            if self.board_position.check_valid(-offset, offset):
-                moves.append(self.board_position.get_offset(-offset, offset))
-            if self.board_position.check_valid(-offset, -offset):
-                moves.append(self.board_position.get_offset(-offset, -offset))
-
-        return moves
+        horiz_vert_moves = get_horiz_vert(
+            self.board_position, ally_positions, enemy_positions
+        )
+        diag_moves = get_diag(self.board_position, ally_positions, enemy_positions)
+        return horiz_vert_moves + diag_moves
 
 
 class Bishop(Piece):
@@ -98,24 +219,18 @@ class Bishop(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "B"
 
-    def get_possible_moves(self, all_pieces, en_passant=False):
+    def get_possible_moves(self, white_pieces, black_pieces, en_passant=False):
         """Get possible moves for a bishop."""
-        moves = []
+        ally_positions = [
+            p.board_position
+            for p in (white_pieces if self.side == Side.WHITE else black_pieces)
+        ]
+        enemy_positions = [
+            p.board_position
+            for p in (black_pieces if self.side == Side.WHITE else white_pieces)
+        ]
 
-        # Diagonals
-        for offset in range(-7, 7):
-            if offset == 0:
-                continue
-            if self.board_position.check_valid(offset, offset):
-                moves.append(self.board_position.get_offset(offset, offset))
-            if self.board_position.check_valid(offset, -offset):
-                moves.append(self.board_position.get_offset(offset, -offset))
-            if self.board_position.check_valid(-offset, offset):
-                moves.append(self.board_position.get_offset(-offset, offset))
-            if self.board_position.check_valid(-offset, -offset):
-                moves.append(self.board_position.get_offset(-offset, -offset))
-
-        return moves
+        return get_diag(self.board_position, ally_positions, enemy_positions)
 
 
 class Rook(Piece):
@@ -126,21 +241,18 @@ class Rook(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "R"
 
-    def get_possible_moves(self, all_pieces, en_passant=False):
+    def get_possible_moves(self, white_pieces, black_pieces, en_passant=False):
         """Get possible moves for a rook."""
-        moves = []
+        ally_positions = [
+            p.board_position
+            for p in (white_pieces if self.side == Side.WHITE else black_pieces)
+        ]
+        enemy_positions = [
+            p.board_position
+            for p in (black_pieces if self.side == Side.WHITE else white_pieces)
+        ]
 
-        # Diagonals
-        for offset in range(-7, 7):
-            if offset == 0:
-                continue
-            # Horizontal/vertical
-            if self.board_position.check_valid(offset, 0):
-                moves.append(self.board_position.get_offset(offset, 0))
-            if self.board_position.check_valid(0, offset):
-                moves.append(self.board_position.get_offset(0, offset))
-
-        return moves
+        return get_horiz_vert(self.board_position, ally_positions, enemy_positions)
 
 
 class Knight(Piece):
@@ -151,26 +263,24 @@ class Knight(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "N"
 
-    def get_possible_moves(self, all_pieces, en_passant=False):
+    def get_possible_moves(self, white_pieces, black_pieces, en_passant=False):
         """Get possible moves for a knight."""
-        moves = []
+        ally_positions = [
+            p.board_position
+            for p in (white_pieces if self.side == Side.WHITE else black_pieces)
+        ]
 
-        if self.board_position.check_valid(2, 1):
-            moves.append(self.board_position.get_offset(2, 1))
-        if self.board_position.check_valid(2, -1):
-            moves.append(self.board_position.get_offset(2, -1))
-        if self.board_position.check_valid(-2, 1):
-            moves.append(self.board_position.get_offset(-2, 1))
-        if self.board_position.check_valid(-2, -1):
-            moves.append(self.board_position.get_offset(-2, -1))
-        if self.board_position.check_valid(1, 2):
-            moves.append(self.board_position.get_offset(1, 2))
-        if self.board_position.check_valid(-1, 2):
-            moves.append(self.board_position.get_offset(-1, 2))
-        if self.board_position.check_valid(1, -2):
-            moves.append(self.board_position.get_offset(1, -2))
-        if self.board_position.check_valid(-1, -2):
-            moves.append(self.board_position.get_offset(-1, -2))
+        moves = []
+        for position in ((2, 1), (2, -1), (-2, 1), (-2, -1)):
+            if self.board_position.check_valid(*position):
+                m = self.board_position.get_offset(*position)
+                if m not in ally_positions:
+                    moves.append(m)
+
+            if self.board_position.check_valid(*reversed(position)):
+                m = self.board_position.get_offset(*reversed(position))
+                if m not in ally_positions:
+                    moves.append(m)
 
         return moves
 
@@ -183,17 +293,27 @@ class Pawn(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = ""
 
-    def get_possible_moves(self, all_pieces, en_passant=False):
+    def get_possible_moves(self, white_pieces, black_pieces, en_passant=False):
         """Get possible moves for a pawn."""
+        ally_positions = [
+            p.board_position
+            for p in (white_pieces if self.side == Side.WHITE else black_pieces)
+        ]
+
         moves = []
 
         multiplier = 1 if self.side == Side.WHITE else -1
         row_idx = 1 if self.side == Side.WHITE else 7
         if self.board_position.row_idx == row_idx:
-            moves.append(self.board_position.get_offset(0, multiplier * 1))
-            moves.append(self.board_position.get_offset(0, multiplier * 2))
-        else:
-            moves.append(self.board_position.get_offset(0, multiplier * 1))
+            if self.board_position.check_valid(0, multiplier * 2):
+                m = self.board_position.get_offset(0, multiplier * 2)
+                if m not in ally_positions:
+                    moves.append(m)
+
+        if self.board_position.check_valid(0, multiplier * 1):
+            m = self.board_position.get_offset(0, multiplier * 1)
+            if m not in ally_positions:
+                moves.append(m)
 
         return moves
 

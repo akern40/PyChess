@@ -8,7 +8,6 @@ from constants import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     WIDTH_BUFFER,
-    SQUARE_SIZE,
     SCREEN_TITLE,
     CHARACTER_SCALING,
     Side,
@@ -36,7 +35,6 @@ class ChessGame(arcade.Window):
         # Setup the piece lists
         self.white_pieces = None
         self.black_pieces = None
-        self.all_pieces = None
 
         # Setup the game states
         self.current_player = None
@@ -53,7 +51,6 @@ class ChessGame(arcade.Window):
         # Set up empty sprite lists
         self.white_pieces = arcade.SpriteList()
         self.black_pieces = arcade.SpriteList()
-        self.all_pieces = arcade.SpriteList()
 
         # Setup the game states
         self.current_player = Side.WHITE
@@ -61,8 +58,8 @@ class ChessGame(arcade.Window):
         self.selected_piece = None
         self.possible_moves = []
 
-        self.init_pieces(Side.WHITE)
-        self.init_pieces(Side.BLACK)
+        init_pieces(Side.WHITE, self.white_pieces)
+        init_pieces(Side.BLACK, self.black_pieces)
 
     def on_draw(self):
         """Render the screen."""
@@ -72,27 +69,6 @@ class ChessGame(arcade.Window):
         self.draw_board()
         self.white_pieces.draw()
         self.black_pieces.draw()
-
-    def init_pieces(self, side: Side):
-        """Initialize the pieces in their starting positions, depending on side."""
-        piece_list = self.white_pieces if side == Side.WHITE else self.black_pieces
-
-        # Change the order depending on the side
-        order = PIECE_ORDER if side == Side.WHITE else reversed(PIECE_ORDER)
-        for col, piece_cls in enumerate(order):
-            # Add a major piece
-            row_idx = 0 if side == Side.WHITE else 7
-            piece = piece_cls(
-                side, BoardPosition(col, row_idx), scale=CHARACTER_SCALING
-            )
-            piece_list.append(piece)
-            self.all_pieces.append(piece)
-
-            # Add a pawn
-            row_idx = 1 if side == Side.WHITE else 6
-            pawn = Pawn(side, BoardPosition(col, row_idx), scale=CHARACTER_SCALING)
-            piece_list.append(pawn)
-            self.all_pieces.append(pawn)
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if button != arcade.MOUSE_BUTTON_LEFT:
@@ -110,12 +86,10 @@ class ChessGame(arcade.Window):
                     break
 
             if self.selected_piece is not None:
-                moves = self.selected_piece.get_possible_moves(
-                    self.white_pieces.extend(self.black_pieces)
+                self.possible_moves = self.selected_piece.get_possible_moves(
+                    self.white_pieces, self.black_pieces
                 )
-                for piece in piece_list:
-                    moves = [m for m in moves if m != piece.board_position]
-                self.possible_moves = moves
+                print([str(m) for m in self.possible_moves])
 
     def draw_board(self):
         """Draw the underlying board."""
@@ -154,6 +128,23 @@ class ChessGame(arcade.Window):
                 color_white = not color_white
             # Switch starting color based on row
             color_white = not color_white
+
+
+def init_pieces(side: Side, piece_list: arcade.SpriteList):
+    """Initialize the pieces in their starting positions, depending on side."""
+
+    # Change the order depending on the side
+    order = PIECE_ORDER if side == Side.WHITE else reversed(PIECE_ORDER)
+    for col, piece_cls in enumerate(order):
+        # Add a major piece
+        row_idx = 0 if side == Side.WHITE else 7
+        piece = piece_cls(side, BoardPosition(col, row_idx), scale=CHARACTER_SCALING)
+        piece_list.append(piece)
+
+        # Add a pawn
+        row_idx = 1 if side == Side.WHITE else 6
+        pawn = Pawn(side, BoardPosition(col, row_idx), scale=CHARACTER_SCALING)
+        piece_list.append(pawn)
 
 
 def main():
