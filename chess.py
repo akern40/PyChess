@@ -39,8 +39,13 @@ class ChessGame(arcade.Window):
         # Setup the game states
         self.current_player = None
         self.player_state = None
+        self.selected_square = None
         self.selected_piece = None
         self.possible_moves = None
+
+        # Sounds!
+        self.move_sound = arcade.load_sound(":resources:sounds/rockHit2.wav")
+        self.take_sound = arcade.load_sound(":resources:sounds/jump2.wav")
 
         # Set the background color
         arcade.set_background_color(arcade.csscolor.WHITE)
@@ -74,27 +79,39 @@ class ChessGame(arcade.Window):
         if button != arcade.MOUSE_BUTTON_LEFT:
             return
 
+        position = BoardPosition.get_from_pixels(x, y)
+        if position.check_valid(0, 0):
+            self.selected_square = position
+
+    def update(self, delta_time):
+        if self.selected_square is None:  # Only update if we've selected a square
+            return
+
         if self.player_state == PlayerState.SELECT_PIECE:
+            # Find if a piece was selected
             piece_list = (
                 self.white_pieces
                 if self.current_player == Side.WHITE
                 else self.black_pieces
             )
             for piece in piece_list:
-                if piece.was_clicked(x, y):
+                if piece.board_position == self.selected_square:
                     self.selected_piece = piece
                     break
 
+            # Get that piece's possible moves, and change the game state
             if self.selected_piece is not None:
                 self.possible_moves = self.selected_piece.get_possible_moves(
                     self.white_pieces, self.black_pieces
                 )
                 self.player_state = PlayerState.MOVE_PIECE
         else:
+            # Get the move corresponding to the selected square
             move = next(
-                (m for m in self.possible_moves if m.square_contains(x, y)), None
+                (m for m in self.possible_moves if m == self.selected_square), None
             )
             if move is not None:
+                # Find captured pieces
                 enemy_pieces = (
                     self.black_pieces
                     if self.current_player == Side.WHITE
@@ -105,16 +122,21 @@ class ChessGame(arcade.Window):
                 )
                 if captured_piece is not None:
                     enemy_pieces.remove(captured_piece)
+                    arcade.play_sound(self.take_sound)
+                else:
+                    arcade.play_sound(self.move_sound)
                 self.selected_piece.set_board_position(move)
 
-                self.selected_piece = None
-                self.possible_moves = []
-                self.player_state = PlayerState.SELECT_PIECE
+                # Swap player
                 self.current_player = self.current_player.swap()
-            else:
-                self.selected_piece = None
-                self.possible_moves = []
-                self.player_state = PlayerState.SELECT_PIECE
+
+            # Reset relevant items
+            self.selected_piece = None
+            self.possible_moves = []
+            self.player_state = PlayerState.SELECT_PIECE
+
+        # Reset selected square
+        self.selected_square = None
 
     def draw_board(self):
         """Draw the underlying board."""

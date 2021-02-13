@@ -51,6 +51,12 @@ class BoardPosition:
         self.center_x = (self.left + self.right) / 2
         self.center_y = (self.bot + self.top) / 2
 
+    @staticmethod
+    def get_from_pixels(x_px: float, y_px: float):
+        col_idx = x_px // SQUARE_SIZE
+        row_idx = y_px // SQUARE_SIZE
+        return BoardPosition(col_idx, row_idx)
+
     def __str__(self):
         """Get the canonical chess representation of the position."""
         col_letter = chr(97 + self.col_idx)
