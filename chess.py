@@ -9,11 +9,12 @@ from constants import (
     SQUARE_SIZE,
     SCREEN_TITLE,
     CHARACTER_SCALING,
-    PIECE_ORDER,
-    Color,
+    Side,
     WHITE_COLOR,
     BLACK_COLOR,
+    BoardPosition,
 )
+from pieces import Pawn, PIECE_ORDER
 
 
 class ChessGame(arcade.Window):
@@ -37,8 +38,8 @@ class ChessGame(arcade.Window):
         self.white_pieces = arcade.SpriteList()
         self.black_pieces = arcade.SpriteList()
 
-        init_pieces(Color.WHITE, self.white_pieces)
-        init_pieces(Color.BLACK, self.black_pieces)
+        init_pieces(Side.WHITE, self.white_pieces)
+        init_pieces(Side.BLACK, self.black_pieces)
 
     def on_draw(self):
         """Render the screen."""
@@ -50,32 +51,20 @@ class ChessGame(arcade.Window):
         self.black_pieces.draw()
 
 
-def init_pieces(color: Color, piece_list: arcade.SpriteList):
-    """Initialize the pieces in their starting positions, depending on color."""
+def init_pieces(side: Side, piece_list: arcade.SpriteList):
+    """Initialize the pieces in their starting positions, depending on side."""
 
-    # Change the order depending on the color
-    order = PIECE_ORDER if color == Color.WHITE else reversed(PIECE_ORDER)
-    for col, piece in enumerate(order):
+    # Change the order depending on the side
+    order = PIECE_ORDER if side == Side.WHITE else reversed(PIECE_ORDER)
+    for col, piece_cls in enumerate(order):
         # Add a major piece
-        location = f"sprites/{color}_{piece}.png".lower()
-        piece = arcade.Sprite(location, scale=CHARACTER_SCALING)
-        piece.center_x = (col + 0.5) * SQUARE_SIZE  # Set the x by column
-
-        # The y-location depends on the color
-        y_loc = 0.5 * SQUARE_SIZE
-        if color == Color.BLACK:
-            y_loc = SCREEN_HEIGHT - y_loc
-        piece.center_y = y_loc
+        y_idx = 0 if side == Side.WHITE else 7
+        piece = piece_cls(side, BoardPosition(col, y_idx), scale=CHARACTER_SCALING)
         piece_list.append(piece)
 
         # Add a pawn
-        location = f"sprites/{color}_pawn.png".lower()
-        pawn = arcade.Sprite(f"sprites/{color}_pawn.png", scale=CHARACTER_SCALING)
-        pawn.center_x = piece.center_x  # Same x as major piece
-
-        # Again, y-location depends on color
-        y_offset = SQUARE_SIZE if color == Color.WHITE else -SQUARE_SIZE
-        pawn.center_y = piece.center_y + y_offset
+        y_idx = 1 if side == Side.WHITE else 6
+        pawn = Pawn(side, BoardPosition(col, y_idx), scale=CHARACTER_SCALING)
         piece_list.append(pawn)
 
 

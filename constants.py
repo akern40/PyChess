@@ -14,15 +14,13 @@ SCREEN_TITLE = "Chess"
 # The pieces are natively 240px, we need to scale them down
 CHARACTER_SCALING = SQUARE_SIZE / 240
 
-# This is white's order of pieces, at the start of the game
-PIECE_ORDER = ["rook", "knight", "bishop", "queen", "king", "bishop", "knight", "rook"]
 
 # Colors
 WHITE_COLOR = csscolor.GHOST_WHITE
 BLACK_COLOR = csscolor.DIM_GRAY
 
 
-class Color(Enum):
+class Side(Enum):
     WHITE = 1
     BLACK = 2
 
@@ -30,7 +28,9 @@ class Color(Enum):
         return self.name.lower()
 
 
-class Position:
+class BoardPosition:
+    """A utility class to handle board position to pixel conversions."""
+
     def __init__(self, col_idx: int, row_idx: int):
         """Initialize with row and column indices and calculate edges and centers."""
         self.row_idx = row_idx
@@ -66,13 +66,14 @@ class Position:
         return 0 <= x_idx < 8 and 0 <= y_idx < 8
 
     def get_offset(self, x_offset: int, y_offset: int):
+        """Get a new BoardPosition instance with the given x and y offset from this instance."""
         if not self.check_valid(x_offset, y_offset):
             raise ValueError("Invalid position")
-        return Position(self.col_idx + x_offset, self.row_idx + y_offset)
+        return BoardPosition(self.col_idx + x_offset, self.row_idx + y_offset)
 
     def __eq__(self, other):
-        if not isinstance(other, Position):
-            raise NotImplementedError("Object must be a Position")
+        if not isinstance(other, BoardPosition):
+            raise NotImplementedError("Object must be a BoardPosition")
         return self.row_idx == other.row_idx and self.col_idx == other.col_idx
 
     def __hash__(self):
