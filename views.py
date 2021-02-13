@@ -15,7 +15,7 @@ from constants import (
     OFFBLACK_COLOR,
     BoardPosition,
 )
-from pieces import Pawn, PIECE_ORDER
+from pieces import Pawn, PIECE_ORDER, King
 
 
 class PlayerState(Enum):
@@ -121,6 +121,10 @@ class ChessGame(arcade.View):
                 if captured_piece is not None:
                     enemy_pieces.remove(captured_piece)
                     arcade.play_sound(self.take_sound)
+
+                    if isinstance(captured_piece, King):
+                        end_view = EndView(self.current_player)
+                        self.window.show_view(end_view)
                 else:
                     arcade.play_sound(self.move_sound)
                 self.selected_piece.set_board_position(move)
@@ -221,3 +225,48 @@ class WelcomeView(arcade.View):
         game_view = ChessGame()
         game_view.setup()
         self.window.show_view(game_view)
+
+
+class EndView(arcade.View):
+    def __init__(self, winner: Side, **kwargs):
+        """Create the view."""
+        super().__init__(**kwargs)
+        self.winner = winner
+
+    def on_show(self):
+        """Run once when we switch to this view."""
+        color = (
+            arcade.csscolor.WHITE
+            if self.winner == Side.WHITE
+            else arcade.csscolor.BLACK
+        )
+        arcade.set_background_color(color)
+
+    def on_draw(self):
+        """Draw this view."""
+        arcade.start_render()
+        color = (
+            arcade.csscolor.BLACK
+            if self.winner == Side.WHITE
+            else arcade.csscolor.WHITE
+        )
+        arcade.draw_text(
+            f"{self.winner} wins!".capitalize(),
+            SCREEN_WIDTH / 2,
+            SCREEN_HEIGHT / 2,
+            color,
+            font_size=50,
+            anchor_x="center",
+        )
+        arcade.draw_text(
+            "Click to Restart",
+            SCREEN_WIDTH / 2,
+            SCREEN_HEIGHT / 2 - 75,
+            color,
+            font_size=20,
+            anchor_x="center",
+        )
+
+    def on_mouse_press(self, _x, _y, _button, _modifiers):
+        view = WelcomeView()
+        self.window.show_view(view)
