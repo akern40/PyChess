@@ -90,6 +90,20 @@ class ChessGame(arcade.Window):
                     self.white_pieces, self.black_pieces
                 )
                 self.player_state = PlayerState.MOVE_PIECE
+        else:
+            move = next(
+                (m for m in self.possible_moves if m.square_contains(x, y)), None
+            )
+            if move is not None:
+                self.selected_piece.set_board_position(move)
+                self.selected_piece = None
+                self.possible_moves = []
+                self.player_state = PlayerState.SELECT_PIECE
+                self.current_player = self.current_player.swap()
+            else:
+                self.selected_piece = None
+                self.possible_moves = []
+                self.player_state = PlayerState.SELECT_PIECE
 
     def draw_board(self):
         """Draw the underlying board."""

@@ -18,10 +18,7 @@ def get_horiz_vert(
     down_ok = True
     up_ok = True
 
-    for offset in range(8):
-        if offset == 0:
-            continue
-
+    for offset in range(1, 8):
         # Right
         if right_ok and position.check_valid(offset, 0):
             m = position.get_offset(offset, 0)
@@ -66,7 +63,7 @@ def get_horiz_vert(
             else:
                 moves.append(m)
 
-        return moves
+    return moves
 
 
 def get_diag(
@@ -81,10 +78,7 @@ def get_diag(
     dl_ok = True
     dr_ok = True
 
-    for offset in range(8):
-        if offset == 0:
-            continue
-
+    for offset in range(1, 8):
         # Up and right
         if ur_ok and position.check_valid(offset, offset):
             m = position.get_offset(offset, offset)
@@ -129,7 +123,7 @@ def get_diag(
             else:
                 moves.append(m)
 
-        return moves
+    return moves
 
 
 class Piece(arcade.Sprite):
@@ -148,6 +142,10 @@ class Piece(arcade.Sprite):
 
     def was_clicked(self, x_px: float, y_px: float):
         return self.board_position.square_contains(x_px, y_px)
+
+    def set_board_position(self, board_position: BoardPosition):
+        self.center_x, self.center_y = board_position.get_center()
+        self.board_position = board_position
 
     def __str__(self):
         return self.letter + str(self.board_position)
@@ -303,7 +301,7 @@ class Pawn(Piece):
         moves = []
 
         multiplier = 1 if self.side == Side.WHITE else -1
-        row_idx = 1 if self.side == Side.WHITE else 7
+        row_idx = 1 if self.side == Side.WHITE else 6
         if self.board_position.row_idx == row_idx:
             if self.board_position.check_valid(0, multiplier * 2):
                 m = self.board_position.get_offset(0, multiplier * 2)

@@ -29,6 +29,11 @@ class Side(Enum):
     def __str__(self):
         return self.name.lower()
 
+    def swap(self):
+        if self.value == 1:
+            return Side.BLACK
+        return Side.WHITE
+
 
 class BoardPosition:
     """A utility class to handle board position to pixel conversions."""
