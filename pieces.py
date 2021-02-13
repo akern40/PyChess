@@ -25,6 +25,9 @@ class Piece(arcade.Sprite):
     def __str__(self):
         return self.letter + str(self.board_position)
 
+    def get_possible_moves(self, all_pieces, en_passant=False):
+        pass
+
 
 class King(Piece):
     """Class representing a king."""
@@ -34,17 +37,20 @@ class King(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "K"
 
-    def get_possible_moves(self):
+    def get_possible_moves(self, all_pieces, en_passant=False):
         """Get possible moves for a king."""
+        piece_positions = [p.board_position for p in all_pieces]
+
         moves = []
         for x_offset in range(-1, 1):
             for y_offset in range(-1, 1):
-
                 if x_offset == 0 and y_offset == 0:
                     continue
 
                 if self.board_position.check_valid(x_offset, y_offset):
-                    moves.append(self.board_position.get_offset(x_offset, y_offset))
+                    position = self.board_position.get_offset(x_offset, y_offset)
+                    if position not in piece_positions:
+                        moves.append(self.board_position.get_offset(x_offset, y_offset))
 
         return moves
 
@@ -57,7 +63,7 @@ class Queen(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "Q"
 
-    def get_possible_moves(self):
+    def get_possible_moves(self, all_pieces, en_passant=False):
         """Get possible moves for a queen."""
         moves = []
 
@@ -92,7 +98,7 @@ class Bishop(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "B"
 
-    def get_possible_moves(self):
+    def get_possible_moves(self, all_pieces, en_passant=False):
         """Get possible moves for a bishop."""
         moves = []
 
@@ -120,7 +126,7 @@ class Rook(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "R"
 
-    def get_possible_moves(self):
+    def get_possible_moves(self, all_pieces, en_passant=False):
         """Get possible moves for a rook."""
         moves = []
 
@@ -145,7 +151,7 @@ class Knight(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "N"
 
-    def get_possible_moves(self):
+    def get_possible_moves(self, all_pieces, en_passant=False):
         """Get possible moves for a knight."""
         moves = []
 
@@ -154,17 +160,17 @@ class Knight(Piece):
         if self.board_position.check_valid(2, -1):
             moves.append(self.board_position.get_offset(2, -1))
         if self.board_position.check_valid(-2, 1):
-            moves.append(self.board_position.get_offset(2, -1))
+            moves.append(self.board_position.get_offset(-2, 1))
         if self.board_position.check_valid(-2, -1):
-            moves.append(self.board_position.get_offset(2, -1))
+            moves.append(self.board_position.get_offset(-2, -1))
         if self.board_position.check_valid(1, 2):
-            moves.append(self.board_position.get_offset(2, -1))
+            moves.append(self.board_position.get_offset(1, 2))
         if self.board_position.check_valid(-1, 2):
-            moves.append(self.board_position.get_offset(2, -1))
+            moves.append(self.board_position.get_offset(-1, 2))
         if self.board_position.check_valid(1, -2):
-            moves.append(self.board_position.get_offset(2, -1))
+            moves.append(self.board_position.get_offset(1, -2))
         if self.board_position.check_valid(-1, -2):
-            moves.append(self.board_position.get_offset(2, -1))
+            moves.append(self.board_position.get_offset(-1, -2))
 
         return moves
 
@@ -177,12 +183,13 @@ class Pawn(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = ""
 
-    def get_possible_moves(self):
+    def get_possible_moves(self, all_pieces, en_passant=False):
         """Get possible moves for a pawn."""
         moves = []
 
-        multiplier = 1 if Side.WHITE else -1
-        if self.board_position.y_idx == multiplier * 1:
+        multiplier = 1 if self.side == Side.WHITE else -1
+        row_idx = 1 if self.side == Side.WHITE else 7
+        if self.board_position.row_idx == row_idx:
             moves.append(self.board_position.get_offset(0, multiplier * 1))
             moves.append(self.board_position.get_offset(0, multiplier * 2))
         else:
