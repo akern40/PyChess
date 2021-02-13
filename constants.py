@@ -31,7 +31,8 @@ class Color(Enum):
 
 
 class Position:
-    def __init__(self, row_idx: int, col_idx: int):
+    def __init__(self, col_idx: int, row_idx: int):
+        """Initialize with row and column indices and calculate edges and centers."""
         self.row_idx = row_idx
         self.col_idx = col_idx
 
@@ -44,13 +45,35 @@ class Position:
         self.center_y = (self.bot + self.top) / 2
 
     def __str__(self):
+        """Get the canonical chess representation of the position."""
         col_letter = chr(97 + self.col_idx)
         return f"{col_letter}{self.row_idx}"
 
     def get_center(self):
+        """Get the x and y centers in pixels."""
         return self.center_x, self.center_y
 
     def square_contains(self, x_px: float, y_px: float):
+        """Tell whether an x and y location in pixels corresponds to the square of this position."""
         in_x = self.left < x_px < self.right
         in_y = self.bot < y_px < self.top
         return in_x and in_y
+
+    def check_valid(self, x_offset: int, y_offset: int):
+        """Check whethere an x_offset and y_offset from this position is on the board."""
+        x_idx = self.col_idx + x_offset
+        y_idx = self.row_idx + y_offset
+        return 0 <= x_idx < 8 and 0 <= y_idx < 8
+
+    def get_offset(self, x_offset: int, y_offset: int):
+        if not self.check_valid(x_offset, y_offset):
+            raise ValueError("Invalid position")
+        return Position(self.col_idx + x_offset, self.row_idx + y_offset)
+
+    def __eq__(self, other):
+        if not isinstance(other, Position):
+            raise NotImplementedError("Object must be a Position")
+        return self.row_idx == other.row_idx and self.col_idx == other.col_idx
+
+    def __hash__(self):
+        return hash(self.row_idx, self.col_idx)
