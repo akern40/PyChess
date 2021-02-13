@@ -297,6 +297,10 @@ class Pawn(Piece):
             p.board_position
             for p in (white_pieces if self.side == Side.WHITE else black_pieces)
         ]
+        enemy_positions = [
+            p.board_position
+            for p in (black_pieces if self.side == Side.WHITE else white_pieces)
+        ]
 
         moves = []
 
@@ -311,6 +315,15 @@ class Pawn(Piece):
         if self.board_position.check_valid(0, multiplier * 1):
             m = self.board_position.get_offset(0, multiplier * 1)
             if m not in ally_positions:
+                moves.append(m)
+
+        if self.board_position.check_valid(1, multiplier * 1):
+            m = self.board_position.get_offset(1, multiplier * 1)
+            if m in enemy_positions:
+                moves.append(m)
+        if self.board_position.check_valid(-1, multiplier * 1):
+            m = self.board_position.get_offset(-1, multiplier * 1)
+            if m in enemy_positions:
                 moves.append(m)
 
         return moves
