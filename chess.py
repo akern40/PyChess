@@ -95,7 +95,18 @@ class ChessGame(arcade.Window):
                 (m for m in self.possible_moves if m.square_contains(x, y)), None
             )
             if move is not None:
+                enemy_pieces = (
+                    self.black_pieces
+                    if self.current_player == Side.WHITE
+                    else self.white_pieces
+                )
+                captured_piece = next(
+                    (p for p in enemy_pieces if p.board_position == move), None
+                )
+                if captured_piece is not None:
+                    enemy_pieces.remove(captured_piece)
                 self.selected_piece.set_board_position(move)
+
                 self.selected_piece = None
                 self.possible_moves = []
                 self.player_state = PlayerState.SELECT_PIECE
