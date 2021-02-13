@@ -25,12 +25,12 @@ class PlayerState(Enum):
     MOVE_PIECE = 2
 
 
-class ChessGame(arcade.Window):
+class ChessGame(arcade.View):
     """Main application class."""
 
     def __init__(self):
         """Initialize the class."""
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__()
 
         # Setup the piece lists
         self.white_pieces = None
@@ -196,8 +196,10 @@ def init_pieces(side: Side, piece_list: arcade.SpriteList):
 
 def main():
     """Main method."""
-    window = ChessGame()
-    window.setup()
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    main_view = ChessGame()
+    main_view.setup()
+    window.show_view(main_view)
     arcade.run()
 
 
