@@ -7,7 +7,6 @@ from constants import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     WIDTH_BUFFER,
-    CHARACTER_SCALING,
     Side,
     WHITE_COLOR,
     OFFWHITE_COLOR,
@@ -15,7 +14,6 @@ from constants import (
     OFFBLACK_COLOR,
     BoardPosition,
 )
-from pieces import Pawn, PIECE_ORDER, King
 from player import Player
 
 
@@ -58,6 +56,32 @@ class ChessGame(arcade.View):
         self.draw_board()
         self.white_player.pieces.draw()
         self.black_player.pieces.draw()
+
+        white_x = WIDTH_BUFFER / 4 + (SCREEN_WIDTH - WIDTH_BUFFER)
+        black_x = 3 * WIDTH_BUFFER / 4 + (SCREEN_WIDTH - WIDTH_BUFFER)
+        arcade.draw_text(
+            "White",
+            white_x,
+            SCREEN_HEIGHT - 50,
+            arcade.color.BLACK,
+            anchor_x="center",
+        )
+        arcade.draw_text(
+            "Black",
+            black_x,
+            SCREEN_HEIGHT - 50,
+            arcade.color.BLACK,
+            anchor_x="center",
+        )
+
+        turn_text_x = white_x if self.white_turn else black_x
+        arcade.draw_text(
+            "Your Turn!",
+            turn_text_x,
+            SCREEN_HEIGHT - 75,
+            arcade.color.BLACK,
+            anchor_x="center",
+        )
 
     def on_mouse_press(self, x: float, y: float, button: int, _modifiers: int):
         if button != arcade.MOUSE_BUTTON_LEFT:
