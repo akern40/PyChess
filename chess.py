@@ -89,7 +89,7 @@ class ChessGame(arcade.Window):
                 self.possible_moves = self.selected_piece.get_possible_moves(
                     self.white_pieces, self.black_pieces
                 )
-                print([str(m) for m in self.possible_moves])
+                self.player_state = PlayerState.MOVE_PIECE
 
     def draw_board(self):
         """Draw the underlying board."""
