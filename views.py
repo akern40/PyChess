@@ -16,6 +16,7 @@ from constants import (
     BoardPosition,
 )
 from pieces import Pawn, PIECE_ORDER, King
+from player import Player
 
 
 class PlayerState(Enum):
@@ -30,16 +31,10 @@ class ChessGame(arcade.View):
         """Initialize the class."""
         super().__init__()
 
-        # Setup the piece lists
-        self.white_pieces = None
-        self.black_pieces = None
-
         # Setup the game states
-        self.current_player = None
-        self.player_state = None
-        self.selected_square = None
-        self.selected_piece = None
-        self.possible_moves = None
+        self.white_player = None
+        self.black_player = None
+        self.white_turn = None
 
         # Sounds!
         self.move_sound = arcade.load_sound(":resources:sounds/rockHit2.wav")
@@ -51,18 +46,9 @@ class ChessGame(arcade.View):
     def setup(self):
         """Set up the game - call to restart."""
 
-        # Set up empty sprite lists
-        self.white_pieces = arcade.SpriteList()
-        self.black_pieces = arcade.SpriteList()
-
-        # Setup the game states
-        self.current_player = Side.WHITE
-        self.player_state = PlayerState.SELECT_PIECE
-        self.selected_piece = None
-        self.possible_moves = []
-
-        init_pieces(Side.WHITE, self.white_pieces)
-        init_pieces(Side.BLACK, self.black_pieces)
+        self.white_player = Player(Side.WHITE, self)
+        self.black_player = Player(Side.BLACK, self)
+        self.white_turn = True
 
     def on_draw(self):
         """Render the screen."""
@@ -70,75 +56,21 @@ class ChessGame(arcade.View):
 
         # Draw the board and pieces to start
         self.draw_board()
-        self.white_pieces.draw()
-        self.black_pieces.draw()
+        self.white_player.pieces.draw()
+        self.black_player.pieces.draw()
 
     def on_mouse_press(self, x: float, y: float, button: int, _modifiers: int):
         if button != arcade.MOUSE_BUTTON_LEFT:
             return
 
+        current_player = self.white_player if self.white_turn else self.black_player
+        opponent = self.black_player if self.white_turn else self.white_player
+
         position = BoardPosition.get_from_pixels(x, y)
         if position.check_valid(0, 0):
-            self.selected_square = position
-
-    def update(self, _delta_time):
-        if self.selected_square is None:  # Only update if we've selected a square
-            return
-
-        if self.player_state == PlayerState.SELECT_PIECE:
-            # Find if a piece was selected
-            piece_list = (
-                self.white_pieces
-                if self.current_player == Side.WHITE
-                else self.black_pieces
-            )
-            for piece in piece_list:
-                if piece.board_position == self.selected_square:
-                    self.selected_piece = piece
-                    break
-
-            # Get that piece's possible moves, and change the game state
-            if self.selected_piece is not None:
-                self.possible_moves = self.selected_piece.get_possible_moves(
-                    self.white_pieces, self.black_pieces
-                )
-                self.player_state = PlayerState.MOVE_PIECE
-        else:
-            # Get the move corresponding to the selected square
-            move = next(
-                (m for m in self.possible_moves if m == self.selected_square), None
-            )
-            if move is not None:
-                # Find captured pieces
-                enemy_pieces = (
-                    self.black_pieces
-                    if self.current_player == Side.WHITE
-                    else self.white_pieces
-                )
-                captured_piece = next(
-                    (p for p in enemy_pieces if p.board_position == move), None
-                )
-                if captured_piece is not None:
-                    enemy_pieces.remove(captured_piece)
-                    arcade.play_sound(self.take_sound)
-
-                    if isinstance(captured_piece, King):
-                        end_view = EndView(self.current_player)
-                        self.window.show_view(end_view)
-                else:
-                    arcade.play_sound(self.move_sound)
-                self.selected_piece.set_board_position(move)
-
-                # Swap player
-                self.current_player = self.current_player.swap()
-
-            # Reset relevant items
-            self.selected_piece = None
-            self.possible_moves = []
-            self.player_state = PlayerState.SELECT_PIECE
-
-        # Reset selected square
-        self.selected_square = None
+            change_turn = current_player.update(position, opponent)
+            if change_turn:
+                self.white_turn = not self.white_turn
 
     def draw_board(self):
         """Draw the underlying board."""
@@ -151,15 +83,20 @@ class ChessGame(arcade.View):
             border_width=10,
         )
 
+        current_player = self.white_player if self.white_turn else self.black_player
+
         color_white = False
         for row in range(8):
             for col in range(8):
                 position = BoardPosition(col, row)
 
                 # Get color based on boolean
-                if self.selected_piece is not None and (
-                    self.selected_piece.board_position == position
-                    or position in self.possible_moves
+                if current_player.selected_piece is not None and (
+                    current_player.selected_piece.board_position == position
+                    or position
+                    in current_player.selected_piece.get_possible_moves(
+                        self.white_player.pieces, self.black_player.pieces
+                    )
                 ):
                     color = OFFWHITE_COLOR if color_white else OFFBLACK_COLOR
                 else:
@@ -178,22 +115,9 @@ class ChessGame(arcade.View):
             # Switch starting color based on row
             color_white = not color_white
 
-
-def init_pieces(side: Side, piece_list: arcade.SpriteList):
-    """Initialize the pieces in their starting positions, depending on side."""
-
-    # Change the order depending on the side
-    order = PIECE_ORDER if side == Side.WHITE else reversed(PIECE_ORDER)
-    for col, piece_cls in enumerate(order):
-        # Add a major piece
-        row_idx = 0 if side == Side.WHITE else 7
-        piece = piece_cls(side, BoardPosition(col, row_idx), scale=CHARACTER_SCALING)
-        piece_list.append(piece)
-
-        # Add a pawn
-        row_idx = 1 if side == Side.WHITE else 6
-        pawn = Pawn(side, BoardPosition(col, row_idx), scale=CHARACTER_SCALING)
-        piece_list.append(pawn)
+    def end_game(self, winner: Player):
+        end_view = EndView(winner)
+        self.window.show_view(end_view)
 
 
 class WelcomeView(arcade.View):
@@ -228,7 +152,7 @@ class WelcomeView(arcade.View):
 
 
 class EndView(arcade.View):
-    def __init__(self, winner: Side, **kwargs):
+    def __init__(self, winner: Player, **kwargs):
         """Create the view."""
         super().__init__(**kwargs)
         self.winner = winner
@@ -237,7 +161,7 @@ class EndView(arcade.View):
         """Run once when we switch to this view."""
         color = (
             arcade.csscolor.WHITE
-            if self.winner == Side.WHITE
+            if self.winner.side == Side.WHITE
             else arcade.csscolor.BLACK
         )
         arcade.set_background_color(color)
@@ -247,11 +171,11 @@ class EndView(arcade.View):
         arcade.start_render()
         color = (
             arcade.csscolor.BLACK
-            if self.winner == Side.WHITE
+            if self.winner.side == Side.WHITE
             else arcade.csscolor.WHITE
         )
         arcade.draw_text(
-            f"{self.winner} wins!".capitalize(),
+            f"{self.winner.side} wins!".capitalize(),
             SCREEN_WIDTH / 2,
             SCREEN_HEIGHT / 2,
             color,
