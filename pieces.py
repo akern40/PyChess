@@ -25,8 +25,9 @@ class Piece(arcade.Sprite):
 class King(Piece):
     """Class representing a king."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, color: Color, position: Position, **kwargs):
+        filename = f"sprites/{color}_king.png"
+        super().__init__(color, position, filename, **kwargs)
         self.letter = "K"
 
     def get_possible_moves(self):
@@ -47,8 +48,9 @@ class King(Piece):
 class Queen(Piece):
     """Class representing a queen."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, color: Color, position: Position, **kwargs):
+        filename = f"sprites/{color}_queen.png"
+        super().__init__(color, position, filename, **kwargs)
         self.letter = "Q"
 
     def get_possible_moves(self):
@@ -81,8 +83,9 @@ class Queen(Piece):
 class Bishop(Piece):
     """Class representing a bishop."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, color: Color, position: Position, **kwargs):
+        filename = f"sprites/{color}_bishop.png"
+        super().__init__(color, position, filename, **kwargs)
         self.letter = "B"
 
     def get_possible_moves(self):
@@ -108,8 +111,9 @@ class Bishop(Piece):
 class Rook(Piece):
     """Class representing a rook."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, color: Color, position: Position, **kwargs):
+        filename = f"sprites/{color}_rook.png"
+        super().__init__(color, position, filename, **kwargs)
         self.letter = "R"
 
     def get_possible_moves(self):
@@ -132,8 +136,9 @@ class Rook(Piece):
 class Knight(Piece):
     """Class representing a knight."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, color: Color, position: Position, **kwargs):
+        filename = f"sprites/{color}_knight.png"
+        super().__init__(color, position, filename, **kwargs)
         self.letter = "N"
 
     def get_possible_moves(self):
@@ -163,8 +168,9 @@ class Knight(Piece):
 class Pawn(Piece):
     """Class representing a pawn."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, color: Color, position: Position, **kwargs):
+        filename = f"sprites/{color}_pawn.png"
+        super().__init__(color, position, filename, **kwargs)
         self.letter = ""
 
     def get_possible_moves(self):
