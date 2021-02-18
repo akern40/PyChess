@@ -279,12 +279,12 @@ class Pawn(Piece):
         if self.board_position.row_idx == row_idx:
             if self.board_position.check_valid(0, multiplier * 2):
                 m = self.board_position.get_offset(0, multiplier * 2)
-                if m not in ally_positions:
+                if m not in ally_positions and m not in enemy_positions:
                     moves.append(m)
 
         if self.board_position.check_valid(0, multiplier * 1):
             m = self.board_position.get_offset(0, multiplier * 1)
-            if m not in ally_positions:
+            if m not in ally_positions and m not in enemy_positions:
                 moves.append(m)
 
         if self.board_position.check_valid(1, multiplier * 1):
