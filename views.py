@@ -14,7 +14,7 @@ from constants import (
     OFFBLACK_COLOR,
     BoardPosition,
 )
-from player import Player
+from player import Player, get_en_passant_position
 
 
 class PlayerState(Enum):
@@ -120,7 +120,9 @@ class ChessGame(arcade.View):
                     current_player.selected_piece.board_position == position
                     or position
                     in current_player.selected_piece.get_possible_moves(
-                        current_player.pieces, opponent.pieces
+                        current_player.pieces,
+                        opponent.pieces,
+                        get_en_passant_position(opponent),
                     )
                 ):
                     color = OFFWHITE_COLOR if color_white else OFFBLACK_COLOR

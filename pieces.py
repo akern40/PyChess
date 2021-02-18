@@ -150,7 +150,7 @@ class Piece(arcade.Sprite):
     def __str__(self):
         return self.letter + str(self.board_position)
 
-    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=None):
         pass
 
 
@@ -162,7 +162,7 @@ class King(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "K"
 
-    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=None):
         """Get possible moves for a king."""
         ally_positions = [p.board_position for p in ally_pieces]
 
@@ -188,7 +188,7 @@ class Queen(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "Q"
 
-    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=None):
         """Get possible moves for a queen."""
         ally_positions = [p.board_position for p in ally_pieces]
         enemy_positions = [p.board_position for p in enemy_pieces]
@@ -208,7 +208,7 @@ class Bishop(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "B"
 
-    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=None):
         """Get possible moves for a bishop."""
         ally_positions = [p.board_position for p in ally_pieces]
         enemy_positions = [p.board_position for p in enemy_pieces]
@@ -224,7 +224,7 @@ class Rook(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "R"
 
-    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=None):
         """Get possible moves for a rook."""
         ally_positions = [p.board_position for p in ally_pieces]
         enemy_positions = [p.board_position for p in enemy_pieces]
@@ -240,7 +240,7 @@ class Knight(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = "N"
 
-    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=None):
         """Get possible moves for a knight."""
         ally_positions = [p.board_position for p in ally_pieces]
 
@@ -267,7 +267,7 @@ class Pawn(Piece):
         super().__init__(side, board_position, filename, **kwargs)
         self.letter = ""
 
-    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=False):
+    def get_possible_moves(self, ally_pieces, enemy_pieces, en_passant=None):
         """Get possible moves for a pawn."""
         ally_positions = [p.board_position for p in ally_pieces]
         enemy_positions = [p.board_position for p in enemy_pieces]
@@ -289,11 +289,11 @@ class Pawn(Piece):
 
         if self.board_position.check_valid(1, multiplier * 1):
             m = self.board_position.get_offset(1, multiplier * 1)
-            if m in enemy_positions:
+            if m in enemy_positions or (en_passant is not None and m == en_passant):
                 moves.append(m)
         if self.board_position.check_valid(-1, multiplier * 1):
             m = self.board_position.get_offset(-1, multiplier * 1)
-            if m in enemy_positions:
+            if m in enemy_positions or (en_passant is not None and m == en_passant):
                 moves.append(m)
 
         return moves
